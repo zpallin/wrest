@@ -1,0 +1,6 @@
+[package]
+name = "wrest"
+version = "0.0.1"
+authors = ["Zach Pallin <zpallin@gmail.com>"]
+
+[dependencies]
