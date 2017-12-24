@@ -4,3 +4,10 @@ version = "0.0.1"
 authors = ["Zach Pallin <zpallin@gmail.com>"]
 
 [dependencies]
+serde = "*"
+serde_derive = "*"
+serde_json = "*"
+reqwest = "*"
+env_logger = "*"
+error-chain = "*"
+mockito = "*"
