@@ -83,17 +83,19 @@ impl Request {
     }
 
     pub fn parse_params(&self, params : HashMap<&str, &str>) -> String {
-        let mut out : String = "".to_string();
-        for (key, val) in params {
-            out = format!("{},{}={}", out, key, val);
-        }
-
+        let mut out = params
+                        .iter()
+                        .map(|(k,v)| format!("{}={}", k, v))
+                        .collect::<Vec<String>>()
+                        .join(",");
+        
         // add the "?" if the string is not empty
         if out != "" {
             format!("?{}", out)
         } else {
-            out
+            out.to_string()
         }
+        
     }
 
     pub fn parse_headers(&self, headers : HashMap<&str, &str>) -> String {
@@ -105,44 +107,17 @@ impl Request {
     }
 
     /// carries out the request action as defined
-    pub fn run(&self) -> Result<String, ()> {
+    pub fn run(&self) -> Result<reqwest::Response, reqwest::Error> {
         env_logger::init().expect("Failed to initialize logger");
        
         let url = format!("{}{}{}", self.root, self.path, self.params);
-        let mut res = reqwest::get(&url).unwrap();
+        let mut res = reqwest::get(&url)?;
         
-        println!("Status: {}", res.status());
-        println!("Headers:\n{}", res.headers());
+//        println!("Status: {}", res.status());
+//        println!("Headers:\n{}", res.headers());
+//        println!("Output: \n{}", res.text().unwrap());
 
-        let _ = std::io::copy(&mut res, &mut std::io::stdout()).unwrap();
-        println!("\n\nDone.");
-
-/*
-        let url = url.parse::<hyper::Uri>().unwrap();
-        if url.scheme() != Some("http") {
-            println!("This example only works with 'http' URLs.");
-            return Err(());
-        }
-
-        let mut core = tokio_core::reactor::Core::new().unwrap();
-        let handle = core.handle();
-        let client = Client::configure()
-            .no_proto()
-            .build(&handle);
-
-        let work = client.get(url).and_then(|res| {
-        println!("Response: {}", res.status());
-        println!("Headers: \n{}", res.headers());
-
-        res.body().for_each(|chunk| {
-                io::stdout().write_all(&chunk).map_err(From::from)
-            })
-            }).map(|_| {
-                println!("\n\nDone.");
-            });
-
-        core.run(work).unwrap();
-*/
-        Ok("hello".to_string())
+        //let _ = std::io::copy(&mut res, &mut std::io::stdout()).unwrap();
+        Ok(res)
     }
 }

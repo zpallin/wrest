@@ -96,11 +96,13 @@ mod tests {
 
     #[test]
     fn it_builds() {
+        extern crate reqwest;
+        use reqwest::*;
         let _m = mockito::mock("GET", "/user/zpallin")
           .with_status(201)
           .with_header("content-type", "text/plain")
           .with_header("x-api-key", "1234")
-          .with_body("world")
+          .with_body("<html>test</html>")
           .create();
 
         let mut fakesite = REST::new(mockito::SERVER_URL);
@@ -108,12 +110,16 @@ mod tests {
                         POST, 
                         APIPath::new("/user/{:id}"), 
                         "getuser");
-        let output = fakesite
-                        .call("getuser")
-                        .with(args!(":id" => "zpallin"))
-                        .params(args!("format" => "json"))
-                        .headers(args!("User-Agent" => "test-user"))
-                        .data("{ \"age\": 31 }")
-                        .run();
+        let mut res : Result<Response> = fakesite
+                    .call("getuser")
+                    .with(args!(":id" => "zpallin"))
+                    //.params(args!("format" => "json"))
+                    .headers(args!("User-Agent" => "test-user"))
+                    //.data("{ \"age\": 31 }")
+                    .run();
+       
+        let body = res.unwrap().text().unwrap();
+        println!("OUTPUT BODY: \"{}\"", body);
+        assert_eq!("<html>test</html>", format!("{}", body));
     }
 }
