@@ -6,7 +6,14 @@ use error_chain;
 use std;
 
 use std::collections::HashMap;
-use rest::Action;
+use rest::{Action, APIMethod};
+
+// until I create my own request library, I plan to lean on this most excellent library
+// that deeply simplifies hyper. However, I want to mask it so that I can expose these
+// types via wrest and eventually recreate them while maintaining functionality down the
+// road.
+pub type Response = reqwest::Response;
+pub type Error = reqwest::Error;
 
 pub trait Call {
     fn call(&self, &str) -> Request;
@@ -107,17 +114,27 @@ impl Request {
     }
 
     /// carries out the request action as defined
-    pub fn run(&self) -> Result<reqwest::Response, reqwest::Error> {
+    pub fn run(&self) -> Result<Response, Error> {
         env_logger::init().expect("Failed to initialize logger");
        
-        let url = format!("{}{}{}", self.root, self.path, self.params);
-        let mut res = reqwest::get(&url)?;
-        
-//        println!("Status: {}", res.status());
-//        println!("Headers:\n{}", res.headers());
-//        println!("Output: \n{}", res.text().unwrap());
+        let url = &format!("{}{}{}", self.root, self.path, self.params);
 
-        //let _ = std::io::copy(&mut res, &mut std::io::stdout()).unwrap();
-        Ok(res)
+        match self.action.method {
+            APIMethod::GET => Ok(self.get(url)?),
+            APIMethod::POST => Ok(self.post(url)?),
+            APIMethod::PUT => Ok(self.put(url)?)
+        }
+    }
+
+    pub fn get(&self, url : &str) -> Result<Response, Error> {
+        Ok(reqwest::get(url)?)
+    }
+
+    pub fn post(&self, url : &str) -> Result<Response, Error> {
+        Ok(reqwest::get(url)?)
+    }
+
+    pub fn put(&self, url : &str) -> Result<Response, Error> {
+        Ok(reqwest::get(url)?)
     }
 }

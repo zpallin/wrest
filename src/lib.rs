@@ -18,3 +18,12 @@ pub mod apipath;
 pub mod rest;
 pub mod request;
 
+// easy prelude for use statements to do the basics
+pub mod prelude {
+    pub use rest::prelude::*;
+    pub use rest::methods::*;
+    pub use request::*;
+    pub use request::Response as Response;
+    pub use request::Error as Error;
+    pub use apipath::*;
+}
